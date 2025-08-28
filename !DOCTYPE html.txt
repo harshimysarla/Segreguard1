@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Integration Dashboard</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --frontend: #7209b7;
+            --backend: #480ca8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--frontend), var(--backend));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        
+        .frontend .panel-title {
+            color: var(--frontend);
+        }
+        
+        .backend .panel-title {
+            color: var(--backend);
+        }
+        
+        .icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-online {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        
+        .status-offline {
+            background: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+        }
+        
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .arrow {
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+            color: var(--success);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        .request, .response {
+            padding: 15px;
+            border-radius: 8px;
+            width: 45%;
+            background: rgba(255, 255, 255, 0.1);
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        
+        .interaction {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .log {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .timestamp {
+            color: var(--success);
+            margin-right: 10px;
+        }
+        
+        .endpoint {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .method {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .get { background: #10b981; }
+        .post { background: #f59e0b; }
+        .put { background: #3b82f6; }
+        .delete { background: #ef4444; }
+        
+        .url {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Full-Stack Integration Dashboard</h1>
+            <p class="subtitle">Visualizing the connection between Frontend and Backend</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="panel frontend">
+                <div class="panel-header">
+                    <div class="icon">⚛</div>
+                    <h2 class="panel-title">Frontend (React/Vue)</h2>
+                </div>
+                <p>User interface built with modern JavaScript framework</p>
+                <p><strong>Port:</strong> 5173 (Vite Dev Server)</p>
+                <p><strong>URL:</strong> http://localhost:5173</p>
+                
+                <div class="status">
+                    <div class="status-dot status-online"></div>
+                    <span>Online - Connected to backend</span>
+                </div>
+                
+                <h3>API Endpoints Used:</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/data</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/users</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method put">PUT</span>
+                    <span class="url">/api/users/{id}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method delete">DELETE</span>
+                    <span class="url">/api/users/{id}</span>
+                </div>
+            </div>
+            
+            <div class="panel backend">
+                <div class="panel-header">
+                    <div class="icon">🐍</div>
+                    <h2 class="panel-title">Backend (Django)</h2>
+                </div>
+                <p>REST API built with Django and Django REST Framework</p>
+                <p><strong>Port:</strong> 8000 (Django Dev Server)</p>
+                <p><strong>URL:</strong> http://127.0.0.1:8000</p>
+                
+                <div class="status">
+                    <div class="status-dot status-online"></div>
+                    <span>Online - Accepting requests</span>
+                </div>
+                
+                <h3>Available Endpoints:</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/data/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/users/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/users/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/admin/</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-flow">
+            <div class="request">
+                {<br>
+                &nbsp;&nbsp;"type": "GET",<br>
+                &nbsp;&nbsp;"url": "/api/data",<br>
+                &nbsp;&nbsp;"headers": {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"Authorization": "Bearer token123"<br>
+                &nbsp;&nbsp;}<br>
+                }
+            </div>
+            
+            <div class="arrow">⇄</div>
+            
+            <div class="response">
+                {<br>
+                &nbsp;&nbsp;"status": 200,<br>
+                &nbsp;&nbsp;"data": {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"id": 1,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"name": "Example Data",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"value": 42<br>
+                &nbsp;&nbsp;}<br>
+                }
+            </div>
+        </div>
+        
+        <div class="interaction">
+            <h3>Test the Connection</h3>
+            <p>Simulate API requests between frontend and backend</p>
+            
+            <button class="btn" onclick="simulateRequest('GET', '/api/data')">GET Data</button>
+            <button class="btn" onclick="simulateRequest('POST', '/api/users')">Create User</button>
+            <button class="btn" onclick="simulateRequest('PUT', '/api/users/1')">Update User</button>
+            <button class="btn" onclick="simulateRequest('DELETE', '/api/users/1')">Delete User</button>
+            
+            <div class="log" id="requestLog">
+                <div class="log-entry">
+                    <span class="timestamp">[12:34:56]</span>
+                    <span>System ready. No requests yet.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function simulateRequest(method, endpoint) {
+            const log = document.getElementById('requestLog');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Remove the initial message if it's the first request
+            if (log.children.length === 1 && log.children[0].textContent.includes('No requests yet')) {
+                log.innerHTML = '';
+            }
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                <span>${method} request to ${endpoint}</span>
+                <span style="color: #4ade80;">→ Success (200 OK)</span>
+            `;
+            
+            log.prepend(entry);
+            
+            // Update the request/response display
+            document.querySelector('.request').innerHTML = `{<br>
+                &nbsp;&nbsp;"type": "${method}",<br>
+                &nbsp;&nbsp;"url": "${endpoint}",<br>
+                &nbsp;&nbsp;"headers": {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"Authorization": "Bearer token123"<br>
+                &nbsp;&nbsp;}<br>
+            }`;
+            
+            // Simulate different responses based on endpoint
+            let responseData = '';
+            if (endpoint === '/api/data') {
+                responseData = `{<br>
+                    &nbsp;&nbsp;"status": 200,<br>
+                    &nbsp;&nbsp;"data": {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"id": 1,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"name": "Example Data",<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"value": ${Math.floor(Math.random() * 100)}<br>
+                    &nbsp;&nbsp;}<br>
+                }`;
+            } else if (endpoint === '/api/users' && method === 'POST') {
+                responseData = `{<br>
+                    &nbsp;&nbsp;"status": 201,<br>
+                    &nbsp;&nbsp;"message": "User created successfully",<br>
+                    &nbsp;&nbsp;"id": ${Math.floor(Math.random() * 1000)}<br>
+                }`;
+            } else if (endpoint.startsWith('/api/users/') && method === 'PUT') {
+                responseData = `{<br>
+                    &nbsp;&nbsp;"status": 200,<br>
+                    &nbsp;&nbsp;"message": "User updated successfully"<br>
+                }`;
+            } else if (endpoint.startsWith('/api/users/') && method === 'DELETE') {
+                responseData = `{<br>
+                    &nbsp;&nbsp;"status": 200,<br>
+                    &nbsp;&nbsp;"message": "User deleted successfully"<br>
+                }`;
+            }
+            
+            document.querySelector('.response').innerHTML = responseData;
+        }
+    </script>
+</body>
+</html>
